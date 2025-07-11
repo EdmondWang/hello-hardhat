@@ -1,7 +1,7 @@
 require('@nomicfoundation/hardhat-toolbox');
 require('@chainlink/env-enc').config();
 
-const { META_MASK_PRIVATE_KEY, SEPOLIA_URL, ETHERSCAN_API_TOKEN } = process.env;
+const { PRIVATE_KEY_1, PRIVATE_KEY_2, SEPOLIA_URL, ETHERSCAN_API_TOKEN } = process.env;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
   networks: {
     sepolia: {
       url: SEPOLIA_URL,
-      accounts: [META_MASK_PRIVATE_KEY],
+      accounts: [PRIVATE_KEY_1, PRIVATE_KEY_2],
       chainId: 11155111,
     },
   },

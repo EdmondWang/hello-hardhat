@@ -3,19 +3,19 @@ pragma solidity 0.8.28;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-// 1. create a receive money function
-// 2. record donater and query
-// 3. if achieve target in the locked window, manafuctur could pick monery
-// 4. if not achieve target in the loced windiw, investoer could withdraaw money
+// 1. Create a function to receive funds: fund()
+// 2. Record the address of each donor
+// 3. If the funding target is achieved within the locked window, the manufacturer can withdraw the funds
+// 4. If the target is not achieved within the locked window, investors can withdraw
 
 contract FundMe {
     mapping(address => uint256) public fundersToAmount;
 
-    uint256 MINIMUM_VALUE = 1 * 10**18; // 1 wei USD
+    uint256 constant FUND_MIN_VALUE = 1 * 10**18; // at least 1 USD * 10^18
+
+    uint256 constant FUND_TARGET_VALUE = 10 * 10**18; // 10 USD * 10^18
 
     AggregatorV3Interface internal dataFeed;
-
-    uint256 constant TARGET = 10 * 10**18; // 10 wei USD
 
     address public owner;
 
@@ -29,7 +29,7 @@ contract FundMe {
     constructor(uint256 _lockTime) {
         dataFeed = AggregatorV3Interface(
             0x694AA1769357215DE4FAC081bf1f309aDC325306
-        ); // ETH/USD on Seplolia testnet
+        ); // ETH/USD on Sepolia testnet
         owner = msg.sender;
 
         deploymentTimestamp = block.timestamp;
@@ -37,7 +37,7 @@ contract FundMe {
     }
 
     function fund() external payable {
-        require(convertEthToUsd(msg.value) >= MINIMUM_VALUE, "Send more ETH");
+        require(convertEthToUsd(msg.value) >= FUND_MIN_VALUE, "Send more ETH");
         require(block.timestamp < deploymentTimestamp + lockTime, "Window is closed");
         fundersToAmount[msg.sender] = msg.value;
     }
@@ -60,11 +60,16 @@ contract FundMe {
     // 这里的 (ethPrice/10^8) 是 1 ETH 单价，（ethAmount/10^18)是ETH的数量
     // 所以 这个函数将最终实际美元价值扩大了10^18倍
     // 1 Finney = 2.5 USD, 1000000 Gwei = 2.5USD
-    // 500000 Gwei = 1.25 USD
+    // 500000 Gwei = 1.25 USD =》 0。0005 
     // 400000 Gwei​ = 1 USD, 0.4 Fenny
     // 3600000 Gwei = 9USD. 3.5 Fenny
     // 250000 Gwei = 0.6125 USD
 
+    /**
+     * 
+     * @param ethAmount in wei
+     * @return USD * 10^18
+     */
     function convertEthToUsd(uint256 ethAmount)
         internal
         view
@@ -80,7 +85,7 @@ contract FundMe {
 
     function getFund() external windowClosed onlyOwner {
         require(
-            convertEthToUsd(address(this).balance) >= TARGET,
+            convertEthToUsd(address(this).balance) >= FUND_TARGET_VALUE,
             "Target is not reached"
         );
 
@@ -95,14 +100,14 @@ contract FundMe {
         (success, ) = payable(msg.sender).call{value: address(this).balance}(
             ""
         );     
-        require(success, "transfer transcation is failed");
+        require(success, "transfer transaction is failed");
         fundersToAmount[msg.sender] = 0;
         getFundSuccess = true;
     }
 
     function refund() external windowClosed {
         require(
-            convertEthToUsd(address(this).balance) < TARGET,
+            convertEthToUsd(address(this).balance) < FUND_TARGET_VALUE,
             "Target is reached"
         );
         require(fundersToAmount[msg.sender] != 0, "there is no found for you");
@@ -111,11 +116,11 @@ contract FundMe {
         (success, ) = payable(msg.sender).call{
             value: fundersToAmount[msg.sender]
         }("");
-        require(success, "transfer transcation is failed");
+        require(success, "transfer transaction is failed");
         fundersToAmount[msg.sender] = 0;
     }
 
-    function setFunderToAmount(address funder, uint256 amount) external {
+    function setFundersToAmount(address funder, uint256 amount) external {
         require(msg.sender == erc20Addr, "You do not have permission to call this function");
         fundersToAmount[funder] = amount;
     }

@@ -1,3 +1,4 @@
 # hello-hardhat
 
-Contact Address: 0x3EDede7614D49D4141E23291f9485d407F474146
+There is 1500000000000000 wei in
+https://sepolia.etherscan.io/address/0xd5b5D0fb3A910B9c206C754Cca885Cd466083D7b
