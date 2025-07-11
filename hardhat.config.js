@@ -1,5 +1,6 @@
 require('@nomicfoundation/hardhat-toolbox');
 require('@chainlink/env-enc').config();
+require('./tasks');
 
 const { PRIVATE_KEY_1, PRIVATE_KEY_2, SEPOLIA_URL, ETHERSCAN_API_TOKEN } = process.env;
 

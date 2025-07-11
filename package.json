@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "npx hardhat run scripts/deployFundMe.js --network sepolia",
+    "deploy": "npx hardhat run scripts/deploy.js --network sepolia",
     "verify": "npx hardhat verify --network sepolia 0x85d9bC7c97751384662D17e7EbD6cFe3579801af \"10\""
   },
   "keywords": [],
